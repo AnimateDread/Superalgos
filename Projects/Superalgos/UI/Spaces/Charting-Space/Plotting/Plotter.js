@@ -2,7 +2,7 @@ function newPlotter() {
     const MODULE_NAME = 'Plotter'
     const ERROR_LOG = true
     const logger = newWebDebugLog()
-    
+
 
     let thisObject = {
         currentRecord: undefined,
@@ -151,16 +151,20 @@ function newPlotter() {
     function onMouseOver(event) {
         let userPosition = UI.projects.superalgos.utilities.dateRateTransformations.getDateFromPointAtBrowserCanvas(event, thisObject.container, coordinateSystem)
         userPositionDate = userPosition.valueOf()
+        let rateRange = 10
+        if (productDefinition.referenceParent.config.rateRange !== undefined) {
+            rateRange = productDefinition.referenceParent.config.rateRange
+        }
 
         let minPositionPoint = {
             x: event.x,
-            y: event.y + 10
+            y: event.y + rateRange
         }
         minUserPositionRate = UI.projects.superalgos.utilities.dateRateTransformations.getRateFromPointAtBrowserCanvas(minPositionPoint, thisObject.container, coordinateSystem)
 
         let maxPositionPoint = {
             x: event.x,
-            y: event.y - 10
+            y: event.y - rateRange
         }
         maxUserPositionRate = UI.projects.superalgos.utilities.dateRateTransformations.getRateFromPointAtBrowserCanvas(maxPositionPoint, thisObject.container, coordinateSystem)
     }
@@ -521,9 +525,65 @@ function newPlotter() {
                             if (record[ratePropertyName] === undefined) {
                                 currentRecordChanged()
                             } else {
-                                /* Current Record depends also on rate */
-                                if (record[ratePropertyName] >= minUserPositionRate && record[ratePropertyName] <= maxUserPositionRate) {
-                                    currentRecordChanged()
+                                if (productDefinition.referenceParent.config.rateInArrayAtIndex !== undefined) {
+                                    /*
+                                    If this property is present, it means for us that the rate is not comming as 
+                                    a property of the record object, but instead, the record object contains an 
+                                    array at the property ratePropertyName, and inside that array there are other 
+                                    arrays from where we need to find the rate at some of its records at the index
+                                    position determined by rateInArrayIndex
+                                    */
+                                    let rateArray = record[ratePropertyName]
+                                    let rateInRange = false
+                                    for (let i = 0; i < rateArray.length; i++) {
+                                        let rateArrayItem = rateArray[i]
+                                        /* 
+                                        Here we will take the rate for this array item and we will apply the offset
+                                        rules defined at the Plotter Module Config for this kind of sitiations.
+                                        */
+                                        let rate = rateArrayItem[productDefinition.referenceParent.config.rateInArrayAtIndex]
+                                        let point = {
+                                            x: 0,
+                                            y: rate
+                                        }
+                                        point = coordinateSystem.transformThisPoint(point)
+                                        point = UI.projects.superalgos.utilities.coordinateTransformations.transformThisPoint(point, container)
+                                        point.y =
+                                            point.y -
+                                            productDefinition.referenceParent.config.rateOffsetBasedOnArrayIndex * i -
+                                            productDefinition.referenceParent.config.rateOffset
+                                        rate = UI.projects.superalgos.utilities.dateRateTransformations.getRateFromPointAtBrowserCanvas(point, thisObject.container, coordinateSystem)
+
+                                        /*
+                                        We will try to find at which record is the mouse pointer close enough.
+                                        */
+                                        if (rate >= minUserPositionRate && rate <= maxUserPositionRate) {
+                                            /* 
+                                            We store the index found here so as to enable whoever receives this 
+                                            record to know which record the user is pointing at.
+                                            */
+                                            DEBUG.variable1 = 'i: ' + i
+                                            record.rateIndex = i
+                                            currentRecordChanged()
+                                            rateInRange = true
+                                            break
+                                        }
+                                    }
+                                    if (rateInRange === false) {
+                                        /*
+                                        If the User is not pointing to a rate in particular we are still going
+                                        to raise the event but without a rateindex property
+                                        */
+                                        record.rateIndex = undefined
+                                        currentRecordChanged()
+                                    }
+                                } else {
+                                    /* 
+                                    Current Record depends that the mouse pointer is within a range close enought to the rate 
+                                    */
+                                    if (record[ratePropertyName] >= minUserPositionRate && record[ratePropertyName] <= maxUserPositionRate) {
+                                        currentRecordChanged()
+                                    }
                                 }
                             }
                         } else {
@@ -752,14 +812,16 @@ function newPlotter() {
                             y: dataPointObject.y
                         }
                         dataPoint = UI.projects.superalgos.spaces.chartingSpace.viewport.fitIntoVisibleArea(dataPoint)
-                        dataPoint = thisObject.fitFunction(dataPoint)
 
-                        imagePosition.x = dataPoint.x
-                        imagePosition.y = dataPoint.y
+                        imagePosition.x = dataPoint.x - imageSize / 2 + offsetX
+                        imagePosition.y = dataPoint.y - imageSize / 2 - offsetY
+
+                        imagePosition = thisObject.fitFunction(imagePosition, true)
+
                         let imageToDraw = UI.projects.superalgos.spaces.designSpace.getIconByProjectAndName('Superalgos', imageName)
                         if (imageToDraw !== undefined) {
                             if (imageToDraw.canDrawIcon === true) {
-                                browserCanvasContext.drawImage(imageToDraw, imagePosition.x - imageSize / 2 + offsetX, imagePosition.y - imageSize / 2 - offsetY, imageSize, imageSize)
+                                browserCanvasContext.drawImage(imageToDraw, imagePosition.x, imagePosition.y, imageSize, imageSize)
                             }
                         } else {
                             console.log('Can not plot image named ' + imageName + ' of product ' + productDefinition.name + ' because it does not exist.')
@@ -798,14 +860,15 @@ function newPlotter() {
                             y: dataPointObject.y
                         }
                         dataPoint = UI.projects.superalgos.spaces.chartingSpace.viewport.fitIntoVisibleArea(dataPoint)
-                        dataPoint = thisObject.fitFunction(dataPoint)
 
-                        textPosition.x = dataPoint.x
-                        textPosition.y = dataPoint.y
+                        textPosition.x = dataPoint.x + offsetX
+                        textPosition.y = dataPoint.y - offsetY
+
+                        textPosition = thisObject.fitFunction(textPosition)
 
                         browserCanvasContext.font = fontSize + 'px ' + UI_FONT.PRIMARY
                         browserCanvasContext.fillStyle = 'rgba(' + paletteColor + ', ' + opacity + ')'
-                        browserCanvasContext.fillText(value, textPosition.x + offsetX, textPosition.y - offsetY)
+                        browserCanvasContext.fillText(value, textPosition.x, textPosition.y)
                     }
                 }
             }
@@ -861,7 +924,7 @@ function newPlotter() {
             /* We use the datapoints already calculated. */
             dataPoints = record.dataPoints
         } else {
-             if (logged === false) {
+            if (logged === false) {
                 logged = true
             }
             let dataPoints = new Map()
@@ -873,7 +936,11 @@ function newPlotter() {
                     if (point.pointFormula !== undefined) {
                         let x = 0
                         let y = 0
-                        eval(point.pointFormula.code)
+                        try {
+                            eval(point.pointFormula.code)
+                        } catch (err) {
+                            continue
+                        }
                         let rawPoint = {
                             x: x,
                             y: y

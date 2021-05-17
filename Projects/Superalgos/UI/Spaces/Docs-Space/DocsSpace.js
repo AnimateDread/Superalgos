@@ -20,6 +20,7 @@ function newSuperalgosDocSpace() {
         currentBookBeingRendered: undefined,
         paragraphMap: undefined,  // Here we will store a map of paragraphs from the Docs Node, Concept, Topics, Tutorials, Reviews or Books Schema in order to find it when we need to update them.
         textArea: undefined,
+        sharePage: sharePage,
         changeLanguage: changeLanguage,
         changeCurrentBranch: changeCurrentBranch,
         changeContributionsBranch: changeContributionsBranch,
@@ -27,6 +28,7 @@ function newSuperalgosDocSpace() {
         exitEditMode: exitEditMode,
         openSpaceAreaAndNavigateTo: openSpaceAreaAndNavigateTo,
         navigateTo: navigateTo,
+        searchPage: searchPage,
         scrollToElement: scrollToElement,
         physics: physics,
         draw: draw,
@@ -220,6 +222,11 @@ function newSuperalgosDocSpace() {
         UI.projects.superalgos.spaces.docsSpace.navigateTo('Superalgos', 'Topic', 'Docs In ' + languageLabel)
     }
 
+    function sharePage() {
+        let clipboard = "docs.goto " + UI.projects.superalgos.spaces.docsSpace.currentDocumentBeingRendered.project + '->' + UI.projects.superalgos.spaces.docsSpace.currentDocumentBeingRendered.category + '->' + UI.projects.superalgos.spaces.docsSpace.currentDocumentBeingRendered.type
+        UI.projects.superalgos.utilities.clipboard.copyTextToClipboard(clipboard)
+    }
+
     function onKeyDown(event) {
         /* 
         When an editor is on focus we will only
@@ -227,7 +234,7 @@ function newSuperalgosDocSpace() {
         so as to tell the editor container when the user
         would like to close the editor. ESC key exits edit mode.    
         */
-        if (event.key === 'Escape') { 
+        if (event.key === 'Escape') {
             UI.projects.superalgos.spaces.docsSpace.exitEditMode()
         }
     }
@@ -266,7 +273,6 @@ function newSuperalgosDocSpace() {
 
     function onClosing() {
         thisObject.contextMenu.removeContextMenuFromScreen()
-        UI.projects.superalgos.spaces.docsSpace.currentDocumentBeingRendered = undefined
         thisObject.isVisible = false
     }
 
@@ -284,6 +290,11 @@ function newSuperalgosDocSpace() {
         getReadyToNavigate(project, category, type, anchor, nodeId, placeholder)
 
         thisObject.sidePanelTab.open()
+    }
+
+    function searchPage() {
+        UI.projects.superalgos.spaces.docsSpace.currentDocumentBeingRendered = undefined
+        thisObject.mainSearchPage.render()
     }
 
     function navigateTo(project, category, type, anchor, nodeId, placeholder) {

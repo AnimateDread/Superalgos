@@ -25,15 +25,29 @@ function newUiObjectConstructor() {
     }
 
     function createUiObject(userAddingNew, payload) {
+        
+        /*
+        In case we are replacing an existing uiObject and floatingObject
+        */
+        if (payload.floatingObject !== undefined) {
+            payload.floatingObject.finalize()
+        }
+        if (payload.uiObject !== undefined) {
+            payload.uiObject.finalize()
+        }
+
         let floatingObject = newFloatingObject()
         floatingObject.fitFunction = UI.projects.superalgos.spaces.floatingSpace.fitIntoVisibleArea
         floatingObject.container.connectToParent(UI.projects.superalgos.spaces.floatingSpace.container, false, false, false, false, false, false, false, false)
         floatingObject.initialize('UI Object', payload)
+
         payload.floatingObject = floatingObject
 
         /*
-        When this object is created based on a backup, share or clone, we will have a savedPayload that we will use to set the initial properties.
-        If it is a new object being created out of the user interface, we jusst continue with the construction process.
+        When this object is created based on a backup, share or clone, 
+        we will have a savedPayload that we will use to set the initial properties.
+        If it is a new object being created out of the user interface, 
+        we jusst continue with the construction process.
         */
         if (userAddingNew === false && payload.node.type !== 'Workspace') {
             let position = {
@@ -69,7 +83,8 @@ function newUiObjectConstructor() {
         }
 
         /*
-        For brand new objects being created directly by the user, we will make them inherit some properties
+        For brand new objects being created directly by the user, 
+        we will make them inherit some properties
         from their closest siblings, and if they don't have, from their parents.
         */
 
@@ -353,6 +368,8 @@ function newUiObjectConstructor() {
         menuItemsInitialValues.push(
             {
                 action: 'Parent Detach',
+                askConfirmation: true,
+                confirmationLabel: "Confirm to Detach",
                 actionFunction: floatingObject.payload.executeAction,
                 actionProject: 'Superalgos',
                 label: undefined,
@@ -368,6 +385,8 @@ function newUiObjectConstructor() {
         menuItemsInitialValues.push(
             {
                 action: 'Reference Detach',
+                askConfirmation: true,
+                confirmationLabel: "Confirm to Detach",
                 actionFunction: floatingObject.payload.executeAction,
                 actionProject: 'Superalgos',
                 label: undefined,

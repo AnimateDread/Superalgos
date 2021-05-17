@@ -121,7 +121,7 @@ cursor: pointer;
 .docs-tooltip {
 position: relative;
 display: inline-block;
-border-bottom: 1px dashed #0295aa; 
+border-bottom: 1px dashed #999; 
 cursor: pointer;
 line-height: inherit;
 }
@@ -518,6 +518,22 @@ text-decoration: none;
 color: #ffd1a9;
 }
 
+.docs-footer-language {
+width: 30px;
+margin-top: 7px;
+padding: 7 7px;
+}
+
+.docs-footer-language-selected {
+    width: 30px;
+    margin-top: 7px;
+    padding: 7 7px;
+    background-color: rgba(230, 234, 234, 0.2);
+/* border: 1px solid rgba(205, 212, 213, 0.5); DELETE Candidate*/
+border: 1px solid rgba(200, 200, 200, .5);
+border-radius: 3px;
+    }
+
 
 /* DELETE candidate
 .docs-footer-body {
@@ -564,9 +580,9 @@ margin: 0 0 0 15px;
 
 code.docs-code {
 color: #d9534f;
-background-color: rgba(230, 234, 234, 1);
+background-color: rgba(230, 234, 234, .5);
 /* border: 1px solid rgba(205, 212, 213, 0.5); DELETE Candidate*/
-border: 1px solid rgba(54, 85, 88, .3);
+border: 1px solid rgba(54, 85, 88, .1);
 border-radius: 3px;
 padding: 0 5;
 }
@@ -880,6 +896,36 @@ color: #31708f;
 a:hover.docs-search-result-content-record-project-category-link {
 text-decoration: underline;
 cursor: pointer;
+}
+
+.docs-search-result-content-record-topic {
+font-size: 90%;
+color: #31708f;
+}
+
+.docs-search-result-content-record-tutorial {
+font-size: 90%;
+color: #31708f;
+}
+
+.docs-search-result-content-record-review {
+font-size: 90%;
+color: #31708f;
+}
+
+.docs-search-result-content-record-topic {
+font-size: 90%;
+color: #31708f;
+}
+
+.docs-search-result-content-record-tutorial {
+font-size: 90%;
+color: #31708f;
+}
+
+.docs-search-result-content-record-review {
+font-size: 90%;
+color: #31708f;
 }
 
 .docs-search-result-content-record-title {

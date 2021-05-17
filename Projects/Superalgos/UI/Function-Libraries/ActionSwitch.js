@@ -634,7 +634,7 @@ function newSuperalgosActionSwitch() {
                 {
                     let definition = getSchemaDocument(action.node)
                     if (definition !== undefined) {
-                        UI.projects.superalgos.spaces.docsSpace.openSpaceAreaAndNavigateTo(action.node.project,'Node', action.node.type)
+                        UI.projects.superalgos.spaces.docsSpace.openSpaceAreaAndNavigateTo(action.node.project, 'Node', action.node.type)
                     }
                 }
                 break
@@ -663,9 +663,19 @@ function newSuperalgosActionSwitch() {
                     UI.projects.superalgos.functionLibraries.pluginsFunctions.pluginMissingTradingEngines(action.node, action.rootNodes)
                 }
                 break
-            case 'Add Missing Plugin Super Scripts':
+            case 'Add Missing Plugin Learning Mines':
                 {
-                    UI.projects.superalgos.functionLibraries.pluginsFunctions.pluginMissingSuperScripts(action.node, action.rootNodes)
+                    UI.projects.superalgos.functionLibraries.pluginsFunctions.pluginMissingLearningMines(action.node, action.rootNodes)
+                }
+                break
+            case 'Add Missing Plugin Learning Systems':
+                {
+                    UI.projects.superalgos.functionLibraries.pluginsFunctions.pluginMissingLearningSystems(action.node, action.rootNodes)
+                }
+                break
+            case 'Add Missing Plugin Learning Engines':
+                {
+                    UI.projects.superalgos.functionLibraries.pluginsFunctions.pluginMissingLearningEngines(action.node, action.rootNodes)
                 }
                 break
             case 'Add Missing Plugin Tutorials':
@@ -676,6 +686,30 @@ function newSuperalgosActionSwitch() {
             case 'Add Missing Workspace Projects':
                 {
                     UI.projects.superalgos.functionLibraries.workspaceFunctions.addMissingWorkspaceProjects(action.node, action.rootNodes)
+                }
+                break
+            case 'Switch To Forward Testing':
+                {
+                    action.node.type = "Forward Testing Session"
+                    UI.projects.superalgos.spaces.floatingSpace.uiObjectConstructor.createUiObject(true, action.node.payload)
+                }
+                break
+            case 'Switch To Live Trading':
+                {
+                    action.node.type = "Live Trading Session"
+                    UI.projects.superalgos.spaces.floatingSpace.uiObjectConstructor.createUiObject(true, action.node.payload)
+                }
+                break
+            case 'Switch To Paper Trading':
+                {
+                    action.node.type = "Paper Trading Session"
+                    UI.projects.superalgos.spaces.floatingSpace.uiObjectConstructor.createUiObject(true, action.node.payload)
+                }
+                break
+            case 'Switch To Backtesting':
+                {
+                    action.node.type = "Backtesting Session"
+                    UI.projects.superalgos.spaces.floatingSpace.uiObjectConstructor.createUiObject(true, action.node.payload)
                 }
                 break
         }

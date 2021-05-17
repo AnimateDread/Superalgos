@@ -20,6 +20,7 @@ function newFloatingLayer() {
     
 
     let thisObject = {
+        isProximityPhysicsNeeded: false,
         addFloatingObject: addFloatingObject,
         removeFloatingObject: removeFloatingObject,
         getFloatingObject: getFloatingObject,
@@ -145,25 +146,7 @@ function newFloatingLayer() {
     }
 
     function draw() {
-        drawInvisibleObjects()
         drawVisibleObjects()
-    }
-
-    function drawInvisibleObjects() {
-        for (let i = 0; i < invisibleFloatingObjects.length; i++) {
-            let floatingObject = invisibleFloatingObjects[i]
-            floatingObject.drawBackground()
-        }
-
-        for (let i = 0; i < invisibleFloatingObjects.length; i++) {
-            let floatingObject = invisibleFloatingObjects[i]
-            floatingObject.drawMiddleground()
-        }
-
-        for (let i = 0; i < invisibleFloatingObjects.length; i++) {
-            let floatingObject = invisibleFloatingObjects[invisibleFloatingObjects.length - i - 1]
-            floatingObject.drawForeground()
-        }
     }
 
     function drawVisibleObjects() {
@@ -210,6 +193,12 @@ function newFloatingLayer() {
         let newInvisibleArray = []
         for (let i = 0; i < invisibleFloatingObjects.length; i++) {
             let floatingObject = invisibleFloatingObjects[i]
+            
+            if (floatingObject.payload === undefined) {
+                /* The floating object was replaced by another one. */
+                invisibleFloatingObjects.splice(i, 1)
+                return
+            }
 
             collapsePhysics(floatingObject)
 
@@ -226,6 +215,12 @@ function newFloatingLayer() {
         let newVisibleArray = []
         for (let i = 0; i < visibleFloatingObjects.length; i++) {
             let floatingObject = visibleFloatingObjects[i]
+
+            if (floatingObject.payload === undefined) {
+                /* The floating object was replaced by another one. */
+                visibleFloatingObjects.splice(i, 1)
+                return
+            }
 
             collapsePhysics(floatingObject)
 
@@ -271,12 +266,21 @@ function newFloatingLayer() {
         */
 
         try {
+            
+            thisObject.isProximityPhysicsNeeded = false // this might be turned on bu the visiblePhysics downstream if needed. 
+
             makeVisible()
             makeInvisible()
             visiblePhysics()
             enginePhysics()
-            proximityPhysics()
 
+            if (thisObject.isProximityPhysicsNeeded === true) {
+                /*
+                This is an expensive calculation, so we are going to do it only when we need to.
+                */
+                proximityPhysics()
+            }
+            
             function visiblePhysics() {
                 for (let i = 0; i < visibleFloatingObjects.length; i++) {
                     let floatingObject = visibleFloatingObjects[i]
@@ -294,8 +298,6 @@ function newFloatingLayer() {
                 /* This function makes all the calculations to apply phisycs on all visible floatingObjects in this layer. */
 
                 try {
-                    DEBUG.variable1 = 'Invisible Floating Objets: ' + invisibleFloatingObjects.length
-                    DEBUG.variable2 = 'Visible Floating Objets: ' + visibleFloatingObjects.length
 
                     if (UI.projects.superalgos.spaces.floatingSpace.settings.physics !== true) {return}
 
